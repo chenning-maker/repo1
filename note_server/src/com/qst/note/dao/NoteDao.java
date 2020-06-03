@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.qst.note.bean.NoteBean;
@@ -158,5 +159,50 @@ public Boolean DeleteNote(int id){
 	
 }	
 	
+
+
+//5.获取指定用户的所有的备忘录：
+public ArrayList<NoteBean> GetAllNotes(String tel){
+	
+	int user_id=new UserDao().getIdByTel(tel);
+	ArrayList<NoteBean> notes=null;
+	
+	Connection conn=DBUtil.getConnection();
+	PreparedStatement ps=null;
+	ResultSet rs=null;
+	
+	try {
+		//预编译：安全高效，可用占位符（在运行之前编译好）
+		ps=conn.prepareStatement("select * from note_table where user_id=?");
+	    
+	    ps.setInt(1, user_id);
+	    rs=ps.executeQuery();
+	    notes=new ArrayList<>();
+	    while(rs.next()){
+	    	
+	    	NoteBean note=new NoteBean();
+	    	note.setId(rs.getInt("id"));
+	    	note.setTitle(rs.getString("title"));
+	    	note.setContent(rs.getString("content"));
+	    	note.setUpdate_time(rs.getString("update_time"));
+	    	note.setCreate_time(rs.getString("create_time"));
+	    	note.setNote_time(rs.getString("note_time"));
+	    	note.setUser_id(rs.getInt("user_id"));
+	    	
+	    	notes.add(note);
+	    	
+	    }
+	    return notes;
+	    
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		return notes;//如果出异常，就插入失败
+	}finally {
+		 DBUtil.close(conn, ps, rs);
+	}
+	
+	
+}	
 	
 }
